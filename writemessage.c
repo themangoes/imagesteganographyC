@@ -31,16 +31,19 @@ int main(int argc, char* argv[])
     // if the number of arguments is not 3, i.e, ONLY an input image
     // AND ONLY an output image path is not provided, exit the program
     // with an error code -1.
-    if (argc != 3)
+    if (argc != 3 && argc != 4)
     {
-        printf("Incorrect usage.\nCorrect usage: ./writemessage <inputimagepath> <outputimagepath>\n");
+        printf("Incorrect usage.\nCorrect usage: ./writemessage <inputimagepath> <outputimagepath> (optional)<passkey>\n");
         return -1;
     }
 
-    // store the input image and output image paths in their
-    // own separate strings.
+    // store the input image and output image paths and passkey
+    // in their own separate strings.
     char* inputImagePath = argv[1];
     char* outputImagePath = argv[2];
+    char* passkey = NULL;
+    if (argc == 4)
+        passkey = argv[3];
 
     // open the input image, if the input image path is
     // not valid exit with error code 1.
@@ -81,6 +84,12 @@ int main(int argc, char* argv[])
     }
     // store the length of the text string in textlen.
     int textlen = strlen(hiddenText);
+
+    // encrypt the inputted text using the provided passkey
+    if (argc == 4)
+    {
+        encrypt(hiddenText, passkey);
+    }
 
     // variable to keep track if the message has been stored.
     // 0 -> false (message not stored).

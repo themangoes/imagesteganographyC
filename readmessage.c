@@ -23,14 +23,17 @@ int main(int argc, char* argv[])
     // if the number of arguments is not 2, i.e, ONLY the image path
     // of the image with a secret message is not given, exit with
     // an error code -1.
-    if (argc != 2)
+    if (argc != 2 && argc != 3)
     {
-        printf("Incorrect usage.\nCorrect usage: ./readmessage <steganographyimage>\n");
+        printf("Incorrect usage.\nCorrect usage: ./readmessage <steganographyimage> (optional)<passkey>\n");
         return -1;
     }
 
-    // store the image path in its own separate string.
+    // store the image path and passkey in its own separate string.
     char* imagepath = argv[1];
+    char* passkey = NULL;
+    if (argc == 3)
+        passkey = argv[2];
 
     // open the image file from the imagepath
     // if the image path is not valid, exit with error code 1.
@@ -83,7 +86,7 @@ int main(int argc, char* argv[])
             // that was stored, and prints it. It returns 1 (true)
             // if all the text was printed. (i.e, the special byte [0000 0000]
             // that was used to signify the end of text was reached).
-            textPrinted = readCharFromLSBAndPrint(buffer);
+            textPrinted = readCharFromLSBAndPrint(buffer, passkey);
         }
         // end of operations for bmp file.
     }
@@ -117,6 +120,11 @@ int main(int argc, char* argv[])
         // stored comes after it. So read all of the data and print it.
         while (fread(buffer, SIGNATUREBYTESIZE, 1, image) != 0)
         {
+            if (passkey != NULL)
+            {
+                buffer[0] = decryptChar(buffer[0], passkey);
+                buffer[1] = decryptChar(buffer[1], passkey);
+            }
             printf("%c%c", buffer[0], buffer[1]);
         }
 
@@ -165,6 +173,9 @@ int main(int argc, char* argv[])
             // read and print whatever was stored after the EOF.
             while (fread(buffer, 1, 1, image) != 0)
             {
+                if (passkey != NULL)
+                    buffer[0] = decryptChar(buffer[0], passkey);
+
                 printf("%c", buffer[0]);
             }
             // the text has been printed.

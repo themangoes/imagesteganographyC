@@ -64,6 +64,7 @@ int checkFileType(FILE* in, FILE* out)
     // set the cursor to the start of the file for both
     // input and output files (if output file is given).
     fseek(in, 0, SEEK_SET);
+
     if (out != NULL)
         fseek(out, 0, SEEK_SET);
 
@@ -161,13 +162,17 @@ void changeLSBOf(BYTE* byte, int toWhat)
 // this function reads the LSB of each byte in the
 // buffer, calculates it into a single integer, and
 // prints it as a char.
-int readCharFromLSBAndPrint(BYTE* buffer)
+int readCharFromLSBAndPrint(BYTE* buffer, char* passkey)
 {
     int ch = 0;
     for (int i = 0; i < BYTESIZE; i++)
     {
         ch += (buffer[i] % 2) * pow(2, i);
     }
+
+    if (passkey != NULL && ch != 0)
+        ch = decryptChar(ch, passkey);
+
     printf("%c", ch);
 
     // if the buffer contained the special sequence to indicate the end of string
@@ -190,4 +195,40 @@ int readHeaderForBMP(FILE* file)
 
     int pixelArrayOffset = (((buffer[10] << 8) | buffer[9]) << 8) | buffer[8];
     return pixelArrayOffset;
+}
+
+// this function applies a simple encryption algorithm on the
+// given text.
+void encrypt(char* text, char* passkey)
+{
+    int hashNum = hash(passkey),  len = strlen(text);
+
+    for (int i = 0; i < len; i++)
+    {
+        text[i] = (text[i] - hashNum);
+    }
+    text[len - 1] = '\n';
+}
+
+// decrypts the char passed.
+char decryptChar(char c, char* passkey)
+{
+    if (c == '\n')
+        return c;
+
+    int hashNum = hash(passkey);
+    return (c + hashNum);
+}
+
+// generates a simple hash for given passkey.
+int hash(char* passkey)
+{
+    int hashNum = 0;
+
+    for (int i = 0, len = strlen(passkey); i < len; i++)
+    {
+        hashNum += passkey[i];
+    }
+
+    return hashNum % 26;
 }

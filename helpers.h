@@ -31,7 +31,11 @@ void editBufferToStoreChar(BYTE* buffer, int ch);
 void changeLSBOf(BYTE* byte, int toWhat);
 
 // functions that are used only in readmessage.c
-int readCharFromLSBAndPrint(BYTE* buffer);
+int readCharFromLSBAndPrint(BYTE* buffer, char* passkey);
 int readHeaderForBMP(FILE* file);
+
+void encrypt(char* text, char* passkey);
+char decryptChar(char c, char* passkey);
+int hash(char* passkey);
 
 #endif
